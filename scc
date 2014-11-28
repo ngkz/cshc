@@ -16,7 +16,7 @@ COMPILER = {
     'x86_64': "gcc"
 }
 
-parser = argparse.ArgumentParser(description = 'C Shellcode Compiler')
+parser = argparse.ArgumentParser(description = 'scc - C Shellcode Compiler')
 parser.add_argument('srcpath', help = 'source code file')
 parser.add_argument('-o', metavar = "<file>", dest = 'outpath', help = 'place the output into <file>')
 parser.add_argument('-a', '--arch', choices = ("i386", "x86_64", "armel", "arm", "aarch64", "mips", "ppc"), default = "i386", help = 'target architecture')
