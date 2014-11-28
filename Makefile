@@ -1,5 +1,5 @@
-TARGETS=tester_i386 tester_x86_64 tester_armel tester_armhf tester_aarch64 \
-		tester_ppc
+TARGETS=bin/tester_i386 bin/tester_x86_64 bin/tester_armel bin/tester_aarch64 \
+		bin/tester_ppc
 CFLAGS=-Wall -fno-stack-protector -z execstack
 CC_I386=gcc -m32
 CC_X86_64=gcc
@@ -9,19 +9,19 @@ CC_POWERPC=powerpc-linux-gnu-gcc -static
 
 all: $(TARGETS)
 
-tester_i386: tester.c
+bin/tester_i386: tester.c
 	$(CC_I386) $(CFLAGS) -o $@ $<
 
-tester_x86_64: tester.c
+bin/tester_x86_64: tester.c
 	$(CC_X86_64) $(CFLAGS) -o $@ $<
 
-tester_armel: tester.c
+bin/tester_armel: tester.c
 	$(CC_ARMEL) $(CFLAGS) -o $@ $<
 
-tester_aarch64: tester.c
+bin/tester_aarch64: tester.c
 	$(CC_AARCH64) $(CFLAGS) -o $@ $<
 
-tester_ppc: tester.c
+bin/tester_ppc: tester.c
 	$(CC_POWERPC) $(CFLAGS) -o $@ $<
 
 clean:
