@@ -8,12 +8,16 @@ import os.path
 import shutil
 
 SELF_DIR = os.path.dirname(os.path.realpath(__file__))
-LINKER_SCRIPT = os.path.join(SELF_DIR, "linker.ld")
 LSS_PATH = os.path.join(SELF_DIR, "linux-syscall-support", "lss")
 PREPEND = os.path.join(SELF_DIR, "prepend.h")
 
 class ArchBase:
     OBJCOPY = "all-objcopy"
+    _LINKER_SCRIPT = "linker.ld"
+
+    @classmethod
+    def LINKER_SCRIPT(cls):
+        return os.path.join(SELF_DIR, cls._LINKER_SCRIPT)
 
 class ArchI386(ArchBase):
     CC = "gcc -m32"
@@ -24,9 +28,11 @@ class ArchX86_64(ArchBase):
 class ArchARMEL(ArchBase):
     CC = "arm-linux-gnueabi-gcc"
     OBJCOPY = "all-objcopy -I elf32-littlearm"
+    _LINKER_SCRIPT = "linker-arm.ld"
 
 class ArchAArch64(ArchBase):
     CC = "aarch64-linux-gnu-gcc"
+    _LINKER_SCRIPT = "linker-arm.ld"
 
 class ArchPowerPC(ArchBase):
     CC = "powerpc-linux-gnu-gcc"
@@ -34,7 +40,7 @@ class ArchPowerPC(ArchBase):
 ARCH = {
     "i386": ArchI386,
     "x86_64": ArchX86_64,
-    #"armel": ArchARMEL,
+    "armel": ArchARMEL,
     #"aarch64": ArchAArch64,
     #"ppc": ArchPowerPC
 }
@@ -65,7 +71,7 @@ if args.compile_only:
     cmd += " -S"
 
 if not args.normal_elf:
-    cmd += " -Wl,-T," + shlex.quote(LINKER_SCRIPT)
+    cmd += " -Wl,-T," + shlex.quote(ARCH[args.arch].LINKER_SCRIPT())
 
 if args.outpath is None:
     args.outpath = "a.out"

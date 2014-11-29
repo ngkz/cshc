@@ -1,4 +1,4 @@
-int bss;
+int bss = 0;
 int data = 1000;
 
 int _strlen(const char *str) {
