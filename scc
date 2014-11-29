@@ -5,16 +5,47 @@ import shlex
 import subprocess
 import sys
 import os.path
+import shutil
 
 SELF_DIR = os.path.dirname(os.path.realpath(__file__))
 LINKER_SCRIPT = os.path.join(SELF_DIR, "linker.ld")
 LSS_PATH = os.path.join(SELF_DIR, "linux-syscall-support", "lss")
 PREPEND = os.path.join(SELF_DIR, "prepend.h")
 
-COMPILER = {
-    'i386': "gcc -m32",
-    'x86_64': "gcc"
+class ArchBase:
+    OBJCOPY = "all-objcopy"
+
+class ArchI386(ArchBase):
+    CC = "gcc -m32"
+
+class ArchX86_64(ArchBase):
+    CC = "gcc"
+
+class ArchARMEL(ArchBase):
+    CC = "arm-linux-gnueabi-gcc"
+    OBJCOPY = "all-objcopy -I elf32-littlearm"
+
+class ArchAArch64(ArchBase):
+    CC = "aarch64-linux-gnu-gcc"
+
+class ArchPowerPC(ArchBase):
+    CC = "powerpc-linux-gnu-gcc"
+
+ARCH = {
+    "i386": ArchI386,
+    "x86_64": ArchX86_64,
+    #"armel": ArchARMEL,
+    #"aarch64": ArchAArch64,
+    #"ppc": ArchPowerPC
 }
+
+def execute(verbose, cmd):
+    if verbose:
+        print(cmd)
+
+    retcode = subprocess.call(cmd, shell = True)
+    if retcode != 0:
+        sys.exit(retcode)
 
 parser = argparse.ArgumentParser(description = 'scc - C Shellcode Compiler')
 parser.add_argument('srcpath', help = 'source code file')
@@ -22,26 +53,34 @@ parser.add_argument('-o', metavar = "<file>", dest = 'outpath', help = 'place th
 parser.add_argument('-a', '--arch', choices = ("i386", "x86_64", "armel", "arm", "aarch64", "mips", "ppc"), default = "i386", help = 'target architecture')
 parser.add_argument('-v', help = 'verbose mode', action = 'store_true', dest = 'verbose')
 parser.add_argument('-e', '--encoder', choices = ("alnum", "cstring"), help = 'encode shellcode')
+parser.add_argument('-n', help = 'output elf executable with default linker script.', action = 'store_true', dest = 'normal_elf')
+parser.add_argument('-S', help = 'compile only.', action = 'store_true', dest = 'compile_only')
 
 args = parser.parse_args()
 
-cmd = COMPILER[args.arch]
-cmd += " -O3 -fPIE -Winline -finline-functions -ffreestanding -fomit-frame-pointer -fno-zero-initialized-in-bss -isystem {} -include {} -Wl,-T,{},-s,--gc-sections -nostdlib -nodefaultlibs -nostartfiles".format(shlex.quote(LSS_PATH), shlex.quote(PREPEND), shlex.quote(LINKER_SCRIPT))
+cmd = ARCH[args.arch].CC
+cmd += " -pie -O3 -fPIE -Winline -finline-functions -ffreestanding -fomit-frame-pointer -fno-zero-initialized-in-bss -isystem {} -include {} -Wl,-s -nostdlib -nodefaultlibs -nostartfiles".format(shlex.quote(LSS_PATH), shlex.quote(PREPEND))
+
+if args.compile_only:
+    cmd += " -S"
+
+if not args.normal_elf:
+    cmd += " -Wl,-T," + shlex.quote(LINKER_SCRIPT)
+
+if args.outpath is None:
+    args.outpath = "a.out"
+cmd += " -o " + shlex.quote(args.outpath)
 
 if args.verbose:
     cmd += " -Wl,-M"
 
-if not args.outpath is None:
-    cmd += " -o " + shlex.quote(args.outpath)
-
 cmd += " " + shlex.quote(args.srcpath)
 
-if args.verbose:
-    print(cmd)
+execute(args.verbose, cmd)
 
-retcode = subprocess.call(cmd, shell = True)
-if retcode != 0:
-    sys.exit(retcode)
+if not args.normal_elf and not args.compile_only:
+    cmd = "{} -O binary -j .text {}".format(ARCH[args.arch].OBJCOPY, shlex.quote(args.outpath))
+    execute(args.verbose, cmd)
 
 if not args.encoder is None:
     #TODO

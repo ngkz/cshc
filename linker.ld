@@ -1,24 +1,38 @@
-OUTPUT_FORMAT("binary")
-
 SECTIONS {
     .text : {
+        shellcode_start = .;
         _GLOBAL_OFFSET_TABLE_ = .;
-        *(.text.startup)
+        *(.entry)
         *(.text*)
         *(.rodata*)
         *(.data*)
+
+        rel_start = .;
+        *(.rel*)
+        rel_end = .;
     }
 
     .bss : {
         *(.bss)
+        *(COM*)
     }
+
+    .junk : {
+        *(.got*)
+        *(.note.gnu.build-id)
+    }
+
     /DISCARD/ : {
         *(.eh_frame)
         *(.eh_frame_hdr)
-        *(.note.gnu.build-id)
         *(.note.GNU-stack)
-        *(.gnu_debuglink)
-        *(.gnu.lto_*)
-        *(.gnu.hash)
+        *(.dynsym)
+        *(.dynstr*)
+        *(.dynamic*)
+        *(.plt*)
+        *(.interp*)
+        *(.gnu*)
+        *(.hash)
+        *(.comment)
     }
 }

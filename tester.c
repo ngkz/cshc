@@ -15,6 +15,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Can't open\n");
         exit(1);
     }
+    memset(buf, 0xff, sizeof(buf));
     fread(buf, 1, sizeof(buf), scfile);
     fclose(scfile);
     return ((int (*)())buf)();
