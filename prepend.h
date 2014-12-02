@@ -32,14 +32,15 @@ static inline void relocate() {
 }
 #endif
 
-#if defined(__ARM_ARCH_3__) || defined(__ARM_EABI__)
+#if defined(__ARM_ARCH_3__) || defined(__ARM_EABI__) || defined(__aarch64__)
 char rel_start[0] __attribute__((section("._rel_start")));
 char rel_end[0] __attribute__((section("._rel_end")));
+#endif
 
+#if defined(__ARM_ARCH_3__) || defined(__ARM_EABI__)
 static inline void relocate() {
     asm volatile(
-    "0:\n"
-    "    sub    r4, pc, #0b + 8\n"
+    "    adr    r4, entry\n"
     "    ldr    r2, =rel_start    /* r2 <- SRC &__rel_dyn_start */\n"
     "    add    r2, r2, r4\n"
     "    ldr    r3, =rel_end    /* r3 <- SRC &__rel_dyn_end */\n"
@@ -59,6 +60,32 @@ static inline void relocate() {
     "    cmp    r2, r3\n"
     "    blo    1b\n"
     : : : "r0", "r1", "r2", "r3", "r4", "cc", "memory");
+}
+#endif
+
+#ifdef __aarch64__
+static inline void relocate() {
+    asm volatile(
+    "    adr    x9, entry\n"
+    "    ldr    x2, =rel_start    /* x2 <- SRC &__rel_dyn_start */\n"
+    "    add    x2, x2, x9\n"
+    "    ldr    x3, =rel_end    /* x3 <- SRC &__rel_dyn_end */\n"
+    "    add    x3, x3, x9\n"
+    "1:\n"
+    "    ldp    x0, x1, [x2], #16    /* (x0,x1) <- (SRC location, fixup) */\n"
+    "    ldr    x4, [x2], #8        /* x4 <- addend */\n"
+    "    and    x1, x1, #0xffffffff\n"
+    "    cmp    x1, #1027        /* relative fixup? */\n"
+    "    bne    2f\n"
+    "\n"
+    "    /* relative fix: store addend plus offset at dest location */\n"
+    "    add    x0, x0, x9\n"
+    "    add    x4, x4, x9\n"
+    "    str    x4, [x0]\n"
+    "2:\n"
+    "    cmp    x2, x3\n"
+    "    b.lo    1b\n"
+    : : : "x0", "x1", "x2", "x3", "x4", "x9", "cc", "memory");
 }
 #endif
 

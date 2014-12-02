@@ -6,14 +6,17 @@ import subprocess
 import sys
 import os.path
 import shutil
+import tempfile
+import struct
 
 SELF_DIR = os.path.dirname(os.path.realpath(__file__))
 LSS_PATH = os.path.join(SELF_DIR, "linux-syscall-support", "lss")
 PREPEND = os.path.join(SELF_DIR, "prepend.h")
 
 class ArchBase:
-    OBJCOPY = "all-objcopy"
+    OBJCOPY = "objcopy"
     _LINKER_SCRIPT = "linker.ld"
+    CFLAGS = ""
 
     @classmethod
     def LINKER_SCRIPT(cls):
@@ -27,12 +30,14 @@ class ArchX86_64(ArchBase):
 
 class ArchARMEL(ArchBase):
     CC = "arm-linux-gnueabi-gcc"
-    OBJCOPY = "all-objcopy -I elf32-littlearm"
+    OBJCOPY = "arm-linux-gnueabi-objcopy"
     _LINKER_SCRIPT = "linker-arm.ld"
 
 class ArchAArch64(ArchBase):
     CC = "aarch64-linux-gnu-gcc"
-    _LINKER_SCRIPT = "linker-arm.ld"
+    CFLAGS = "-mcmodel=tiny"
+    OBJCOPY = "aarch64-linux-gnu-objcopy"
+    _LINKER_SCRIPT = "linker-aarch64.ld"
 
 class ArchPowerPC(ArchBase):
     CC = "powerpc-linux-gnu-gcc"
@@ -41,7 +46,7 @@ ARCH = {
     "i386": ArchI386,
     "x86_64": ArchX86_64,
     "armel": ArchARMEL,
-    #"aarch64": ArchAArch64,
+    "aarch64": ArchAArch64,
     #"ppc": ArchPowerPC
 }
 
@@ -66,6 +71,7 @@ args = parser.parse_args()
 
 cmd = ARCH[args.arch].CC
 cmd += " -pie -O3 -fPIE -Winline -finline-functions -ffreestanding -fomit-frame-pointer -fno-zero-initialized-in-bss -isystem {} -include {} -Wl,-s -nostdlib -nodefaultlibs -nostartfiles".format(shlex.quote(LSS_PATH), shlex.quote(PREPEND))
+cmd += " " + ARCH[args.arch].CFLAGS
 
 if args.compile_only:
     cmd += " -S"
@@ -85,8 +91,30 @@ cmd += " " + shlex.quote(args.srcpath)
 execute(args.verbose, cmd)
 
 if not args.normal_elf and not args.compile_only:
-    cmd = "{} -O binary -j .text {}".format(ARCH[args.arch].OBJCOPY, shlex.quote(args.outpath))
-    execute(args.verbose, cmd)
+    tmpdir = tempfile.mkdtemp()
+    try:
+        rela_file = os.path.join(tmpdir, "rela")
+        if args.arch == "aarch64":
+            cmd = "{} -O binary -j .rela.entry {} {}".format(
+                    ARCH[args.arch].OBJCOPY, shlex.quote(args.outpath), shlex.quote(rela_file))
+            execute(args.verbose, cmd)
+
+        cmd = "{} -O binary -j .text {}".format(ARCH[args.arch].OBJCOPY, shlex.quote(args.outpath))
+        execute(args.verbose, cmd)
+
+        if args.arch == "aarch64":
+            with open(args.outpath, "r+b") as shellcode_file:
+                with open(rela_file, "rb") as rela_file:
+                    while True:
+                        rela = rela_file.read(8 * 3)
+                        if len(rela) == 0:
+                            break
+                        r_offset, r_info, r_addend = struct.unpack("<QQQ", rela)
+                        assert r_info & 0xffffffff == 1027, "unsupported relocation entry" #R_AARCH64_RELATIVE
+                        shellcode_file.seek(r_offset)
+                        shellcode_file.write(struct.pack("<Q", r_addend))
+    finally:
+        shutil.rmtree(tmpdir)
 
 if not args.encoder is None:
     #TODO

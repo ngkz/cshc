@@ -1,8 +1,4 @@
 SECTIONS {
-    /DISCARD/ : {
-        *(.rel.entry)
-    }
-
     .text : {
         _GLOBAL_OFFSET_TABLE_ = .;
         *(.entry)
@@ -10,13 +6,17 @@ SECTIONS {
         *(.rodata*)
         *(.data*)
         *(._rel_start)
-        *(.rel*)
+        *(.rela.data.rel)
         *(._rel_end)
     }
 
     .bss : {
         *(.bss)
         *(COM*)
+    }
+
+    .rela.entry : {
+        *(.rela.entry)
     }
 
     .junk : {
