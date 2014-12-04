@@ -2,7 +2,7 @@ SECTIONS {
     .text : {
         shellcode_start = .;
         _GLOBAL_OFFSET_TABLE_ = .;
-        *(.entry)
+        *(.init)
         *(.text*)
         *(.rodata*)
         *(.data*)
