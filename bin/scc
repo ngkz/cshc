@@ -27,7 +27,12 @@ archobj = scgen.arch(args.arch, args.verbose)
 if args.compile_only:
     archobj.compile_assembly(args.srcpath, args.outpath)
 else:
-    if args.outpath is None:
-        args.outpath = "a.out"
-    archobj.compile_file(args.srcpath, args.outpath)
+    shellcode = archobj.compile(args.srcpath)
 
+    if args.outpath is None:
+        assert not args.verbose and args.outpath is None, "-v and no -o!"
+        sys.stdout.buffer.write(shellcode)
+        sys.exit(0)
+
+    with open(args.outpath, "wb") as outfile:
+        outfile.write(shellcode)

@@ -68,8 +68,8 @@ class Arch:
     def patch_init_reloc(self, elf_path, bin_path, tmpdir):
         pass
 
-    #compile and write shellcode to file
-    def compile_file(self, srcpath, outpath):
+    #compile shellcode
+    def compile(self, srcpath):
         tmpdir = tempfile.mkdtemp()
         try:
             objs = self.compile_libraries()
@@ -79,10 +79,15 @@ class Arch:
 
             objs.append(scobj)
 
-            tmp_elf = os.path.join(tmpdir, "shellcode")
+            tmp_elf = os.path.join(tmpdir, "shellcode_elf")
             self.link_elf(objs, tmp_elf)
+
+            outpath = os.path.join(tmpdir, "shellcode")
             self.elf2binary(tmp_elf, outpath)
             self.patch_init_reloc(tmp_elf, outpath, tmpdir)
+
+            with open(outpath, "rb") as scfile:
+                return scfile.read()
         finally:
             shutil.rmtree(tmpdir)
 
