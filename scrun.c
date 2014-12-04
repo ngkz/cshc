@@ -18,6 +18,12 @@ int main(int argc, char **argv) {
     memset(buf, 0xff, sizeof(buf));
     fread(buf, 1, sizeof(buf), scfile);
     fclose(scfile);
+
+#if (defined(__i386__) || defined(__x86_64__))
+    asm volatile("jmp *%0" :: "a"(buf));
+    return 0;
+#else
     return ((int (*)())buf)();
+#endif
 }
 
