@@ -1,5 +1,5 @@
-TARGETS=bin/tester_i386 bin/tester_x86_64 bin/tester_armel bin/tester_aarch64 \
-		bin/tester_ppc
+TARGETS=bin/scrun-i386 bin/scrun-x86_64 bin/scrun-armel bin/scrun-aarch64 \
+		bin/scrun-ppc
 CFLAGS=-Wall -fno-stack-protector -z execstack
 CC_I386=gcc -m32
 CC_X86_64=gcc
@@ -9,19 +9,19 @@ CC_POWERPC=powerpc-linux-gnu-gcc -static
 
 all: $(TARGETS)
 
-bin/tester_i386: tester.c
+bin/scrun-i386: scrun.c
 	$(CC_I386) $(CFLAGS) -o $@ $<
 
-bin/tester_x86_64: tester.c
+bin/scrun-x86_64: scrun.c
 	$(CC_X86_64) $(CFLAGS) -o $@ $<
 
-bin/tester_armel: tester.c
+bin/scrun-armel: scrun.c
 	$(CC_ARMEL) $(CFLAGS) -o $@ $<
 
-bin/tester_aarch64: tester.c
+bin/scrun-aarch64: scrun.c
 	$(CC_AARCH64) $(CFLAGS) -o $@ $<
 
-bin/tester_ppc: tester.c
+bin/scrun-ppc: scrun.c
 	$(CC_POWERPC) $(CFLAGS) -o $@ $<
 
 clean:

@@ -1,4 +1,4 @@
 /lib/scgen/arch/base/linux-syscall-support/.svn
-/bin/tester_*
+/bin/scrun-*
 __pycache__
 *.o
