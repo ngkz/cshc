@@ -1,5 +1,6 @@
 //perm, uid, gid, size, mtime(unix time, hour, min), filename
 #define DIRECTORY "."
+#define OUTFD 1
 
 static int _strlen(const char *str) {
     int l;
@@ -8,7 +9,7 @@ static int _strlen(const char *str) {
 }
 
 static void print(const char *str) {
-    sys_write(1, str, _strlen(str));
+    sys_write(OUTFD, str, _strlen(str));
 }
 
 static void println(const char *str) {
