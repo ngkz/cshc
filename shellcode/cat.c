@@ -10,6 +10,6 @@ void main() {
     while((readsize = sys_read(fd, buf, sizeof(buf))) > 0) {
         sys_write(OUTFD, buf, readsize);
     }
-    
-    sys_exit(0);
+
+    sys__exit(0);
 }
