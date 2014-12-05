@@ -1,10 +1,6 @@
-from scgen.arch import x86, x86_64, armel, aarch64
-ARCH = {
-    "x86": x86.Arch,
-    "x86_64": x86_64.Arch,
-    "armel": armel.Arch,
-    "aarch64": aarch64.Arch
-}
+ARCH = dict([(name, __import__(
+        "scgen.arch." + name, globals(), locals(), ["Arch"]
+    ).Arch) for name in ("x86", "x86_64", "armel", "aarch64")])
 
 def archlist():
     return ARCH.keys()
