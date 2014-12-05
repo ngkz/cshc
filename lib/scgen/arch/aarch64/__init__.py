@@ -6,7 +6,7 @@ curdir = os.path.dirname(__file__)
 
 class Arch(base.Arch):
     CC = "aarch64-linux-gnu-gcc"
-    CFLAGS = base.Arch.CFLAGS + ["-mcmodel=tiny"]
+    CFLAGS = base.Arch.CFLAGS + ["-mcmodel=tiny", "-O2"]
     OBJCOPY = "aarch64-linux-gnu-objcopy"
     LDSCRIPT = os.path.join(curdir, "linker.ld")
     LIBS = base.Arch.LIBS + [os.path.join(curdir, "init.s")]
