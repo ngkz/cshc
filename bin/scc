@@ -27,7 +27,7 @@ archobj = scgen.arch(args.arch, args.verbose)
 if args.compile_only:
     archobj.compile_assembly(args.srcpath, args.outpath)
 else:
-    shellcode = archobj.compile(args.srcpath)
+    shellcode = archobj.compile_file(args.srcpath)
 
     if args.outpath is None:
         assert not args.verbose and args.outpath is None, "-v and no -o!"

@@ -9,7 +9,7 @@ import scgen
 import subprocess
 import tempfile
 
-class CompileTest(unittest.TestCase):
+class ShellcodeExecuteTest(unittest.TestCase):
     def check_shellcode(self, arch, shellcode):
         tmp = tempfile.NamedTemporaryFile()
         tmp.write(shellcode)
@@ -20,21 +20,42 @@ class CompileTest(unittest.TestCase):
 
         tmp.close()
 
+class CompileFileTest(ShellcodeExecuteTest):
     def test_x86(self):
         self.check_shellcode("x86",
-                scgen.arch("x86").compile("shellcode/test.c"))
+                scgen.arch("x86").compile_file("shellcode/test.c"))
 
     def test_x86_64(self):
         self.check_shellcode("x86_64",
-                scgen.arch("x86_64").compile("shellcode/test.c"))
+                scgen.arch("x86_64").compile_file("shellcode/test.c"))
 
     def test_armel(self):
         self.check_shellcode("armel",
-                scgen.arch("armel").compile("shellcode/test.c"))
+                scgen.arch("armel").compile_file("shellcode/test.c"))
 
     def test_aarch64(self):
         self.check_shellcode("aarch64",
-                scgen.arch("aarch64").compile("shellcode/test.c"))
+                scgen.arch("aarch64").compile_file("shellcode/test.c"))
+
+class CompileStringTest(ShellcodeExecuteTest):
+    SRC = r"""
+    void main() {
+        sys_write(1, "ok\n", 3);
+        sys__exit(0);
+    }
+    """
+
+    def test_x86(self):
+        self.check_shellcode("x86", scgen.arch("x86").compile(self.SRC))
+
+    def test_x86_64(self):
+        self.check_shellcode("x86_64", scgen.arch("x86_64").compile(self.SRC))
+
+    def test_armel(self):
+        self.check_shellcode("armel", scgen.arch("armel").compile(self.SRC))
+
+    def test_aarch64(self):
+        self.check_shellcode("aarch64", scgen.arch("aarch64").compile(self.SRC))
 
 if __name__ == "__main__":
     unittest.main()

@@ -68,8 +68,8 @@ class Arch:
     def patch_init_reloc(self, elf_path, bin_path, tmpdir):
         pass
 
-    #compile shellcode
-    def compile(self, srcpath):
+    #compile file
+    def compile_file(self, srcpath):
         tmpdir = tempfile.mkdtemp()
         try:
             objs = self.compile_libraries()
@@ -90,6 +90,16 @@ class Arch:
                 return scfile.read()
         finally:
             shutil.rmtree(tmpdir)
+
+    #compile string
+    def compile(self, shellcode):
+        tmp = tempfile.NamedTemporaryFile(suffix = ".c")
+        try:
+            tmp.write(shellcode.encode("utf-8"))
+            tmp.flush()
+            return self.compile_file(tmp.name)
+        finally:
+            tmp.close()
 
     #compile and write assembly to file
     def compile_assembly(self, srcpath, outpath):
