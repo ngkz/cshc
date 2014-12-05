@@ -3148,6 +3148,8 @@ struct kernel_statfs {
     // The stat syscall has been deprecated on aarch64. We polyfill it below.
     LSS_INLINE _syscall2(int,     stat,            const char*, f,
                         struct kernel_stat*,   b)
+    LSS_INLINE _syscall2(int,     lstat,            const char*, f,
+                        struct kernel_stat*,   b)
   #endif
   LSS_INLINE _syscall2(int,     statfs,          const char*, f,
                       struct kernel_statfs*, b)
@@ -3991,6 +3993,10 @@ struct kernel_statfs {
   LSS_INLINE int LSS_NAME(stat)(const char *pathname,
                                 struct kernel_stat *buf) {
     return LSS_NAME(newfstatat)(AT_FDCWD, pathname, buf, 0);
+  }
+  LSS_INLINE int LSS_NAME(lstat)(const char *pathname,
+                                struct kernel_stat *buf) {
+    return LSS_NAME(newfstatat)(AT_FDCWD, pathname, buf, AT_SYMLINK_NOFOLLOW);
   }
 
   LSS_INLINE pid_t LSS_NAME(fork)(void) {
