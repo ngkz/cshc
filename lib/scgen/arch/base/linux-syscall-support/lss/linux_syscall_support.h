@@ -2299,6 +2299,7 @@ struct kernel_statfs {
     #define LSS_BODY(type,name,args...)                                       \
           register long __res_r0 __asm__("r0");                               \
           long __res;                                                         \
+          if (__NR_##name <= 255) {                                           \
           __asm__ __volatile__ ("push {r7}\n"                                 \
                                 "mov r7, %1\n"                                \
                                 "swi 0x0\n"                                   \
@@ -2306,6 +2307,15 @@ struct kernel_statfs {
                                 : "=r"(__res_r0)                              \
                                 : "i"(__NR_##name) , ## args                  \
                                 : "lr", "memory");                            \
+          } else {                                                            \
+          __asm__ __volatile__ ("push {r7}\n"                                 \
+                                "mov r7, %1\n"                                \
+                                "swi 0x0\n"                                   \
+                                "pop {r7}\n"                                  \
+                                : "=r"(__res_r0)                              \
+                                : "r"(__NR_##name) , ## args                  \
+                                : "lr", "memory");                            \
+          }                                                                   \
           __res = __res_r0;                                                   \
           LSS_RETURN(type, __res)
     #undef _syscall0
@@ -3183,6 +3193,8 @@ struct kernel_statfs {
                          int,                     h)
     LSS_INLINE _syscall3(int, socket,             int,   d,
                          int,                     t, int,       p)
+    LSS_INLINE _syscall3(int, connect, int, sockfd,
+                         const struct kernel_sockaddr*, addr, unsigned int, len)
     LSS_INLINE _syscall4(int, socketpair,         int,   d,
                          int,                     t, int,       p, int*, s)
   #endif
@@ -3677,6 +3689,8 @@ struct kernel_statfs {
                          unsigned int, tolen)
     LSS_INLINE _syscall2(int, shutdown, int, s, int, how)
     LSS_INLINE _syscall3(int, socket, int, domain, int, type, int, protocol)
+    LSS_INLINE _syscall3(int, connect, int, sockfd,
+                         const struct kernel_sockaddr*, addr, unsigned int, len)
     LSS_INLINE _syscall4(int, socketpair, int, d, int, type, int, protocol,
                          int*, sv)
   #endif
@@ -3718,6 +3732,12 @@ struct kernel_statfs {
 
     LSS_INLINE int LSS_NAME(socket)(int domain, int type, int protocol) {
       return LSS_NAME(socketcall)(1, domain, type, protocol);
+    }
+
+    LSS_INLINE int LSS_NAME(connect)(int sockfd,
+                                     const struct kernel_sockaddr *addr,
+                                     unsigned int addrlen) {
+      return LSS_NAME(socketcall)(3, sockfd, addr, addrlen);
     }
 
     LSS_INLINE int LSS_NAME(socketpair)(int d, int type, int protocol,
