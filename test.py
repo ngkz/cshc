@@ -57,6 +57,24 @@ class CompileStringTest(ShellcodeExecuteTest):
     def test_aarch64(self):
         self.check_shellcode("aarch64", scgen.arch("aarch64").compile(self.SRC))
 
+class NOTreeLoopDistributePatternsRegressionTest(ShellcodeExecuteTest):
+    def test_test(self):
+        scgen.arch("x86").compile("""
+            void *_memset(void *s, int c, size_t n) {
+                unsigned char* p=s;
+                while(n--)
+                    *p++ = (unsigned char)c;
+                return s;
+            }
+
+            int main() {
+                char buf[4096];
+                _memset(buf, 0, sizeof(buf));
+                _memset(buf, 0, sizeof(buf));
+                sys__exit(0);
+            }
+        """)
+
 if __name__ == "__main__":
     unittest.main()
 

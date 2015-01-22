@@ -20,7 +20,8 @@ class Arch:
     CFLAGS = ["-O3", "-fPIE", "-Winline", "-finline-functions", "-ffreestanding",
               "-fomit-frame-pointer", "-fno-zero-initialized-in-bss",
               "-I", os.path.join(curdir, "linux-syscall-support", "lss"),
-              "-include", os.path.join(curdir, "prepend.h")]
+              "-include", os.path.join(curdir, "prepend.h"),
+              "-fno-tree-loop-distribute-patterns"]
     LDFLAGS = ["-pie", "-Wl,-s", "-nostdlib", "-nodefaultlibs", "-nostartfiles"]
     LDSCRIPT = os.path.join(curdir, "linker.ld")
     LIBS = []
