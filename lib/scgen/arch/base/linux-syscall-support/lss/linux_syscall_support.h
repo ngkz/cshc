@@ -4047,6 +4047,8 @@ struct kernel_statfs {
 # pragma pop_macro("lstat64")
 #endif
 
+LSS_INLINE _syscall2(int, nanosleep, struct timespec*, req, struct timespec*, rem);
+
 #if defined(__cplusplus) && !defined(SYS_CPLUSPLUS)
 }
 #endif
