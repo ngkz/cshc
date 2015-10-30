@@ -4049,6 +4049,20 @@ struct kernel_statfs {
 
 LSS_INLINE _syscall2(int, nanosleep, struct timespec*, req, struct timespec*, rem);
 
+struct kernel_file_handle
+{
+  unsigned int handle_bytes;
+  int handle_type;
+  /* File identifier.  */
+  unsigned char f_handle[0];
+};
+LSS_INLINE _syscall3(int,     open_by_handle_at,    int, mount_fd,
+                     struct kernel_file_handle*, handle, int, flags);
+
+#include <linux/perf_event.h>
+LSS_INLINE _syscall5(int, perf_event_open, struct perf_event_attr *, attr,
+                     pid_t, pid, int, cpu, int, group_fd, unsigned long, flags);
+
 #if defined(__cplusplus) && !defined(SYS_CPLUSPLUS)
 }
 #endif
