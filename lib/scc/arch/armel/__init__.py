@@ -1,5 +1,5 @@
 import os.path
-from scgen.arch import base
+from scc.arch import base
 
 curdir = os.path.dirname(__file__)
 

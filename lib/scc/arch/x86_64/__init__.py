@@ -1,5 +1,5 @@
 import os.path
-from scgen.arch import base
+from scc.arch import base
 
 class Arch(base.Arch):
     CC = "x86_64-linux-gnu-gcc"

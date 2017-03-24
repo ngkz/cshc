@@ -5,7 +5,7 @@ SELF_DIR = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(SELF_DIR, "lib"))
 
 import unittest
-import scgen
+import scc
 import subprocess
 import tempfile
 
@@ -23,19 +23,19 @@ class ShellcodeExecuteTest(unittest.TestCase):
 class CompileFileTest(ShellcodeExecuteTest):
     def test_x86(self):
         self.check_shellcode("x86",
-                scgen.arch("x86").compile_file("shellcode/test.c"))
+                scc.arch("x86").compile_file("shellcode/test.c"))
 
     def test_x86_64(self):
         self.check_shellcode("x86_64",
-                scgen.arch("x86_64").compile_file("shellcode/test.c"))
+                scc.arch("x86_64").compile_file("shellcode/test.c"))
 
     def test_armel(self):
         self.check_shellcode("armel",
-                scgen.arch("armel").compile_file("shellcode/test.c"))
+                scc.arch("armel").compile_file("shellcode/test.c"))
 
     def test_aarch64(self):
         self.check_shellcode("aarch64",
-                scgen.arch("aarch64").compile_file("shellcode/test.c"))
+                scc.arch("aarch64").compile_file("shellcode/test.c"))
 
 class CompileStringTest(ShellcodeExecuteTest):
     SRC = r"""
@@ -46,20 +46,20 @@ class CompileStringTest(ShellcodeExecuteTest):
     """
 
     def test_x86(self):
-        self.check_shellcode("x86", scgen.arch("x86").compile(self.SRC))
+        self.check_shellcode("x86", scc.arch("x86").compile(self.SRC))
 
     def test_x86_64(self):
-        self.check_shellcode("x86_64", scgen.arch("x86_64").compile(self.SRC))
+        self.check_shellcode("x86_64", scc.arch("x86_64").compile(self.SRC))
 
     def test_armel(self):
-        self.check_shellcode("armel", scgen.arch("armel").compile(self.SRC))
+        self.check_shellcode("armel", scc.arch("armel").compile(self.SRC))
 
     def test_aarch64(self):
-        self.check_shellcode("aarch64", scgen.arch("aarch64").compile(self.SRC))
+        self.check_shellcode("aarch64", scc.arch("aarch64").compile(self.SRC))
 
 class NOTreeLoopDistributePatternsRegressionTest(ShellcodeExecuteTest):
     def test_test(self):
-        scgen.arch("x86").compile("""
+        scc.arch("x86").compile("""
             void *_memset(void *s, int c, size_t n) {
                 unsigned char* p=s;
                 while(n--)

@@ -1,1 +1,0 @@
-from scgen.arch import *

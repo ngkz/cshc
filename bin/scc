@@ -6,13 +6,13 @@ SELF_DIR = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(SELF_DIR, "..", "lib"))
 
 import argparse
-import scgen
+import scc
 
 parser = argparse.ArgumentParser(description = 'scc - C Shellcode Compiler')
 parser.add_argument('srcpath', help = 'source code file')
 parser.add_argument('-o', metavar = "<file>", dest = 'outpath',
                     help = 'place the output into <file>')
-parser.add_argument('-a', '--arch', choices = scgen.archlist(), default = "x86",
+parser.add_argument('-a', '--arch', choices = scc.archlist(), default = "x86",
                     help = 'target architecture')
 parser.add_argument('-v', help = 'verbose mode', action = 'store_true',
                     dest = 'verbose')
@@ -22,7 +22,7 @@ parser.add_argument('-S', help = 'compile only.', action = 'store_true',
                     dest = 'compile_only')
 args = parser.parse_args()
 
-archobj = scgen.arch(args.arch, args.verbose)
+archobj = scc.arch(args.arch, args.verbose)
 
 if args.compile_only:
     archobj.compile_assembly(args.srcpath, args.outpath)
