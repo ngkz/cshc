@@ -1,7 +1,6 @@
-#define ELFFD 0
-//TODO load elf without temp file.
-#define TMP "/tmp/.e78ecd3df850887a852395d874a6d779"
-#define ARGV0 "aramaki"
+#define INPUT_FD 0
+#define TMP "/tmp/.REPLACE_ME1"
+#define ARGV0 "REPLACE_ME2"
 
 int main() {
     sys_unlink(TMP);
@@ -11,7 +10,7 @@ int main() {
     }
     for(;;) {
         char buf[4096];
-        ssize_t len = sys_read(ELFFD, buf, sizeof(buf));
+        ssize_t len = sys_read(INPUT_FD, buf, sizeof(buf));
         if (len <= 0) break;
         sys_write(fd, buf, len);
     }

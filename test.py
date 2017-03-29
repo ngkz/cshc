@@ -23,19 +23,19 @@ class ShellcodeExecuteTest(unittest.TestCase):
 class CompileFileTest(ShellcodeExecuteTest):
     def test_x86(self):
         self.check_shellcode("x86",
-                cshc.arch("x86").compile_file("shellcode/test.c"))
+                cshc.arch("x86").compile_file("examples/test.c"))
 
     def test_x86_64(self):
         self.check_shellcode("x86_64",
-                cshc.arch("x86_64").compile_file("shellcode/test.c"))
+                cshc.arch("x86_64").compile_file("examples/test.c"))
 
     def test_armel(self):
         self.check_shellcode("armel",
-                cshc.arch("armel").compile_file("shellcode/test.c"))
+                cshc.arch("armel").compile_file("examples/test.c"))
 
     def test_aarch64(self):
         self.check_shellcode("aarch64",
-                cshc.arch("aarch64").compile_file("shellcode/test.c"))
+                cshc.arch("aarch64").compile_file("examples/test.c"))
 
 class CompileStringTest(ShellcodeExecuteTest):
     SRC = r"""
