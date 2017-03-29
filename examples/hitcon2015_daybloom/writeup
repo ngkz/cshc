@@ -1,0 +1,3 @@
+When the shellcode is executed, all fds are closed, and the network is disabled.
+Therefore, we performed timing attack with nanosleep to get the flag.
+The flag is hitcon{Y@uR $h3LlCo6e 1sT stea1th, B|0om}.
