@@ -1,1 +1,0 @@
-from scc.arch import *

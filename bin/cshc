@@ -6,23 +6,23 @@ SELF_DIR = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(SELF_DIR, "..", "lib"))
 
 import argparse
-import scc
+import cshc
 
-parser = argparse.ArgumentParser(description = 'scc - C Shellcode Compiler')
+parser = argparse.ArgumentParser(description = 'cshc - C Shellcode Compiler')
 parser.add_argument('srcpath', help = 'source code file')
 parser.add_argument('-o', metavar = "<file>", dest = 'outpath',
                     help = 'place the output into <file>')
-parser.add_argument('-a', '--arch', choices = scc.archlist(), default = "x86",
+parser.add_argument('-a', '--arch', choices = cshc.archlist(), default = "x86",
                     help = 'target architecture')
 parser.add_argument('-v', help = 'verbose mode', action = 'store_true',
                     dest = 'verbose')
 #parser.add_argument('-e', '--encoder', choices = ("shikata_ga_nai",),
 #                    help = 'encode shellcode')
-parser.add_argument('-S', help = 'compile only.', action = 'store_true',
+parser.add_argument('-S', help = 'output assembly code.', action = 'store_true',
                     dest = 'compile_only')
 args = parser.parse_args()
 
-archobj = scc.arch(args.arch, args.verbose)
+archobj = cshc.arch(args.arch, args.verbose)
 
 if args.compile_only:
     archobj.compile_assembly(args.srcpath, args.outpath)
