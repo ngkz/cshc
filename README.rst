@@ -34,7 +34,10 @@ Python2/3 Library Usage
 
     >>> import cshc
 
-    >> cshc.archlist()
+    >>> cshc.VERSION
+    '0.1.0'
+
+    >>> cshc.archlist()
     ['aarch64', 'x86_64', 'armel', 'x86']
 
     # Compile string
