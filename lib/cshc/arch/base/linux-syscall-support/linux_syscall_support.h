@@ -2532,6 +2532,7 @@ struct kernel_statfs {
     #define LSS_BODY(type,name,args...)                                       \
           register long __res_r0 __asm__("r0");                               \
           long __res;                                                         \
+          if (__NR_##name <= 255) {                                           \
           __asm__ __volatile__ ("push {r7}\n"                                 \
                                 "mov r7, %1\n"                                \
                                 "swi 0x0\n"                                   \
@@ -2539,6 +2540,15 @@ struct kernel_statfs {
                                 : "=r"(__res_r0)                              \
                                 : "i"(__NR_##name) , ## args                  \
                                 : "lr", "memory");                            \
+          } else {                                                            \
+          __asm__ __volatile__ ("push {r7}\n"                                 \
+                                "mov r7, %1\n"                                \
+                                "swi 0x0\n"                                   \
+                                "pop {r7}\n"                                  \
+                                : "=r"(__res_r0)                              \
+                                : "r"(__NR_##name) , ## args                  \
+                                : "lr", "memory");                            \
+          }                                                                   \
           __res = __res_r0;                                                   \
           LSS_RETURN(type, __res)
     #undef _syscall0
@@ -3493,6 +3503,8 @@ struct kernel_statfs {
     // The stat syscall has been deprecated on aarch64. We polyfill it below.
     LSS_INLINE _syscall2(int,     stat,            const char*, f,
                         struct kernel_stat*,   b)
+    LSS_INLINE _syscall2(int,     lstat,            const char*, f,
+                        struct kernel_stat*,   b)
   #endif
   LSS_INLINE _syscall2(int,     statfs,          const char*, f,
                       struct kernel_statfs*, b)
@@ -3526,6 +3538,8 @@ struct kernel_statfs {
                          int,                     h)
     LSS_INLINE _syscall3(int, socket,             int,   d,
                          int,                     t, int,       p)
+    LSS_INLINE _syscall3(int, connect, int, sockfd,
+                         const struct kernel_sockaddr*, addr, unsigned int, len)
     LSS_INLINE _syscall4(int, socketpair,         int,   d,
                          int,                     t, int,       p, int*, s)
   #endif
@@ -4128,6 +4142,8 @@ struct kernel_statfs {
                          unsigned int, tolen)
     LSS_INLINE _syscall2(int, shutdown, int, s, int, how)
     LSS_INLINE _syscall3(int, socket, int, domain, int, type, int, protocol)
+    LSS_INLINE _syscall3(int, connect, int, sockfd,
+                         const struct kernel_sockaddr*, addr, unsigned int, len)
     LSS_INLINE _syscall4(int, socketpair, int, d, int, type, int, protocol,
                          int*, sv)
   #endif
@@ -4170,6 +4186,12 @@ struct kernel_statfs {
 
     LSS_INLINE int LSS_NAME(socket)(int domain, int type, int protocol) {
       return LSS_NAME(socketcall)(1, domain, type, protocol);
+    }
+
+    LSS_INLINE int LSS_NAME(connect)(int sockfd,
+                                     const struct kernel_sockaddr *addr,
+                                     unsigned int addrlen) {
+      return LSS_NAME(socketcall)(3, sockfd, addr, addrlen);
     }
 
     LSS_INLINE int LSS_NAME(socketpair)(int d, int type, int protocol,
@@ -4445,6 +4467,10 @@ struct kernel_statfs {
                                 struct kernel_stat *buf) {
     return LSS_NAME(newfstatat)(AT_FDCWD, pathname, buf, 0);
   }
+  LSS_INLINE int LSS_NAME(lstat)(const char *pathname,
+                                struct kernel_stat *buf) {
+    return LSS_NAME(newfstatat)(AT_FDCWD, pathname, buf, AT_SYMLINK_NOFOLLOW);
+  }
 
   LSS_INLINE pid_t LSS_NAME(fork)(void) {
     // No fork syscall on aarch64 - implement by means of the clone syscall.
@@ -4473,6 +4499,22 @@ struct kernel_statfs {
 # pragma pop_macro("fstat64")
 # pragma pop_macro("lstat64")
 #endif
+
+LSS_INLINE _syscall2(int, nanosleep, struct timespec*, req, struct timespec*, rem);
+
+struct kernel_file_handle
+{
+  unsigned int handle_bytes;
+  int handle_type;
+  /* File identifier.  */
+  unsigned char f_handle[0];
+};
+LSS_INLINE _syscall3(int,     open_by_handle_at,    int, mount_fd,
+                     struct kernel_file_handle*, handle, int, flags);
+
+#include <linux/perf_event.h>
+LSS_INLINE _syscall5(int, perf_event_open, struct perf_event_attr *, attr,
+                     pid_t, pid, int, cpu, int, group_fd, unsigned long, flags);
 
 #if defined(__cplusplus) && !defined(SYS_CPLUSPLUS)
 }
