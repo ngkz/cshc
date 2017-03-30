@@ -36,7 +36,7 @@ curdir = os.path.dirname(__file__)
 class Arch:
     CFLAGS = ["-O3", "-fPIE", "-Winline", "-finline-functions", "-ffreestanding",
               "-fomit-frame-pointer", "-fno-zero-initialized-in-bss",
-              "-I", os.path.join(curdir, "linux-syscall-support", "lss"),
+              "-I", os.path.join(curdir, "linux-syscall-support"),
               "-include", os.path.join(curdir, "prepend.h"),
               "-fno-tree-loop-distribute-patterns"]
     LDFLAGS = ["-pie", "-Wl,-s", "-nostdlib", "-nodefaultlibs", "-nostartfiles"]
